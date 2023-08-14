@@ -1,4 +1,4 @@
-# gematron
+# GEMATRON
 
 A gematria-evolved AI oracle 
 
