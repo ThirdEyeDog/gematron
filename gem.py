@@ -1,4 +1,10 @@
 # GEMATRON aka gem.py
+import re
+from bs4 import BeautifulSoup
+import re
+import urllib
+from playwright.async_api import async_playwright
+
 
 def rule_30(current_generation):
     next_generation = []
@@ -9,6 +15,8 @@ def rule_30(current_generation):
         next_generation.append(0 if left == right else 1)
     return next_generation
 
+
+
 async def fetch_search_results(query):
     async with async_playwright() as p:
         browser = await p.chromium.launch()
@@ -16,25 +24,85 @@ async def fetch_search_results(query):
         search_url = f"https://www.bing.com/search?q={urllib.parse.quote(query)}"
         await page.goto(search_url)
         await page.wait_for_selector(".b_algo")
-        search_results_elements = await page.query_selector_all(".b_algo")
-        search_results = [await element.text_content() for element in search_results_elements]
+
+        # Get the link of the first search result
+        first_link_element = await page.query_selector(".b_algo h2 a")
+        
+        # If there's no link found, we simply return an empty string
+        if not first_link_element:
+            await browser.close()
+            return ""
+
+        first_link = await first_link_element.get_attribute("href")
+        
+        # Navigate to the first link
+        await page.goto(first_link)
+
+        # Get the page's title
+        title = await page.title()
+
+        # Get the page's content
+        content = await page.content()
+
+        # Parse and clean content using BeautifulSoup
+        soup = BeautifulSoup(content, "html.parser")
+
+        # Remove scripts and styles
+        for script in soup(["script", "style"]):
+            script.extract()
+
+        # Get text
+        clean_text = soup.get_text()
+
+        # Combine title and cleaned content
+        content = title + "\n" + clean_text
+
+        # Remove extra whitespaces
+        content = "\n".join([line.strip() for line in content.splitlines() if line.strip()])
+
+        # Use regex to remove unwanted patterns
+        patterns_to_remove = [
+            r"https?://\S+",  # URLs
+            r"\S+@\S+",  # Emails
+            r"\d{5}-\d{4}|\d{5}|\d{9}",  # ZIP codes
+            r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}",  # Phone numbers
+            # This is a simple address regex, which might catch some addresses but not all
+            r"\d{1,5}\s\w.\s(\b\w*\b\s){1,2}\w*\.",  
+        ]
+
+        for pattern in patterns_to_remove:
+            content = re.sub(pattern, "", content)
+
         await browser.close()
-        return search_results
+        
+        return content
+
+
+
 
 def generate_gpt2_response(seed_text, max_length=500):
     input_ids = gpt2_tokenizer.encode(seed_text, return_tensors="pt")
     output = gpt2_model.generate(input_ids, max_length=max_length, num_return_sequences=1, temperature=0.8)
     return gpt2_tokenizer.decode(output[0], skip_special_tokens=True)
 
+
 def simple_gematria_with_total(word):
     word = word.upper()
-    gematria_mapping = {chr(i): i - 64 for i in range(65, 91)}
+    
+    # Define the gematria mapping for English gematria
+    gematria_mapping = {
+        'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6, 'G': 7, 'H': 8, 'I': 9,
+        'J': 10, 'K': 20, 'L': 30, 'M': 40, 'N': 50, 'O': 60, 'P': 70, 'Q': 80, 'R': 90,
+        'S': 100, 'T': 200, 'U': 300, 'V': 400, 'W': 500, 'X': 600, 'Y': 700, 'Z': 800
+    }
+    
     results, total = [], 0
     for letter in word:
         if letter in gematria_mapping:
             results.append((letter, gematria_mapping[letter]))
             total += gematria_mapping[letter]
     return results, total
+
 
 
 
@@ -54,7 +122,7 @@ async def main():
 
     # 4. Get the data from the search’s tokenise the data.
     print("4. Tokenizing first search result...")
-    search_result_text = search_results[0] if search_results else ""
+    search_result_text = search_results if search_results else ""
     search_result_tokenized = gpt2_tokenizer.encode(search_result_text, return_tensors="pt")
 
     # 5. Pass the tokenized data to the cellular automata as seed.
@@ -90,3 +158,4 @@ async def main():
 
 await main()
 
+# WORKING
