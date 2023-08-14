@@ -1,5 +1,16 @@
 # GEMATRON aka gem.py
 
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
+from playwright.async_api import async_playwright
+import urllib.parse
+import asyncio
+import hashlib
+import torch
+
+model_name = "gpt2-medium"
+gpt2_tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+gpt2_model = GPT2LMHeadModel.from_pretrained(model_name)
+
 def rule_30(current_generation):
     next_generation = []
     for i in range(len(current_generation)):
