@@ -6,7 +6,9 @@ Abstract:
 
 This project implements a system that takes user input, retrieves related content from the web, and processes it through cellular automata and natural language models to generate a symbolic response. The input is tokenized with GPT-2 and used to fetch the first search result from Bing. The search result text is hashed into a seed value for a rule_30 cellular automaton, which evolves the pattern for a number of steps. The middle cell state of the final pattern is combined with the tokenized search result text to generate a response using GPT-2. Finally, gematria values are calculated on the letters of the response. The unique components are the integration of web content, cellular automata, a transformer language model, and ancient numerology to produce an emergent, metaphorical response to the user input. The key steps are seeding the cellular automaton with a hash of the web content to incorporate external information, and combining its state with the search results to steer the language model response.
 
-The most unique piece of code is:
+TODO LIST -  check issues for todo-list https://github.com/ThirdEyeDog/gematron/issues/1
+
+This shows the key steps of hashing the web content into a cellular automaton seed, evolving the pattern, extracting the middle cell state, and using it alongside the search result text to generate the final response. The integration of different techniques is what makes this project unique.
 
 ```python
 # Convert search result text to cellular automaton seed 
@@ -24,7 +26,7 @@ combined_seed = f"{ca_response} {gpt2_tokenizer.decode(search_result_tokenized[0
 response_from_gpt2 = generate_gpt2_response(combined_seed)
 ```
 
-This shows the key steps of hashing the web content into a cellular automaton seed, evolving the pattern, extracting the middle cell state, and using it alongside the search result text to generate the final response. The integration of different techniques is what makes this project unique.
+
 
 Main Flow:
 
