@@ -10,7 +10,11 @@ import hashlib
 import urllib
 import torch
 import re
+import os
 
+
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 model_name = "gpt2-medium"
 gpt2_tokenizer = GPT2Tokenizer.from_pretrained(model_name)
@@ -89,7 +93,7 @@ async def fetch_search_results(query):
     
 def generate_gpt2_response(seed_text, max_length=50):
     input_ids = gpt2_tokenizer.encode(seed_text, return_tensors="pt")
-    output = gpt2_model.generate(input_ids, max_length=max_length, num_return_sequences=1, temperature=1)
+    output = gpt2_model.generate(input_ids, max_length=max_length, num_return_sequences=1, temperature=1.2)
     generated_text = gpt2_tokenizer.decode(output[0], skip_special_tokens=True)
     
     # Check if the generated text is the same as the seed text
@@ -115,15 +119,50 @@ def simple_gematria_with_total(word):
             results.append((letter, gematria_mapping[letter]))
             total += gematria_mapping[letter]
     return results, total
+
+async def gematria_lookup(number):
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.new_page()
+        lookup_url = f"https://www.gematrix.org/?word={number}"
+        await page.goto(lookup_url)
+
+        # Extract content from the page
+        content_element = await page.query_selector("body")
+        if content_element:
+            full_content = await content_element.inner_text()
+            target_text = "Gematria Words And Phrases Of"
+            target_index = full_content.find(target_text)
+            if target_index != -1:
+                content = full_content[target_index + len(target_text):]
+            else:
+                content = "Target text not found"
+        else:
+            content = "Body element not found"
+
+        await browser.close()
+        return content
+
+
+
+
+
 async def main():
-    # 1. Get an input by the user, as text.
-    text = input("Enter your text: ")
+
+
+    # Initialize the tokenizer
+    gpt2_tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+
+    # 1. Get an input by the user, as text. Properly handle Unicode and special characters.
+    text = input("Enter your text: ").strip()
     print(f"1. Got input: {text}")
 
-    # 2. Tokenize the input using the GPT2.
+    # 2. Tokenize the input using the GPT2 tokenizer from Transformers
     print("2. Tokenizing input...")
-    inputs = gpt2_tokenizer.encode(text, return_tensors="pt")
-    max_length = 15
+    inputs = gpt2_tokenizer.encode(text, return_tensors="pt", max_length=50, truncation=True)
+    max_length = 50
+    print(f"Tokenized input: {inputs}")
+    
 
     # 3. Do the web search with the terms.
     search_results = await fetch_search_results(text)
@@ -161,8 +200,14 @@ async def main():
     if gematria_values:
         gematria_formula = ", ".join([f"{pair[0]}: {pair[1]}" for pair in gematria_values])
         print(f"8. Gematria: {gematria_formula} | Total: {total_value}")
+        
+        # Lookup the gematria number on gematrix.org
+        gematrix_result = await gematria_lookup(total_value)
+        print(f"9. Gematrix.org Result: {gematrix_result}")
+
     else:
         print("8. Gematria: No valid letters found.")
+
         
     
         
