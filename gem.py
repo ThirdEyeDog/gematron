@@ -42,7 +42,7 @@ async def fetch_search_results(query):
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page()
-        search_url = f"https://www.bing.com/search?q={urllib.parse.quote(query)}"
+        search_url = f"https://www.bing.com/search?q={urllib.parse.quote(query)}&PC=U316&FORM=CHROMN"
         await page.goto(search_url)
         await page.wait_for_selector(".b_algo")
 
