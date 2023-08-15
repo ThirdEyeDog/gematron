@@ -1,6 +1,3 @@
-# GEMATRON aka gem.py START HERE
-# FULL FLATENED CODE
-
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
@@ -12,29 +9,37 @@ import torch
 import re
 import os
 
-
-
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 model_name = "gpt2-medium"
 gpt2_tokenizer = GPT2Tokenizer.from_pretrained(model_name)
 gpt2_model = GPT2LMHeadModel.from_pretrained(model_name)
 
+#v.0.0.0.3
+# current
+
+import time
+
+def rule_30(current_generation, generations=7):
+    key_binary = ""
+    for _ in range(generations):
+        next_generation = []
+        # ASCII visualization of the current generation
+        print(''.join('#' if cell == 1 else '.' for cell in current_generation))
+        time.sleep(0.3) # Delay for animation effect
+        for i in range(len(current_generation)):
+            left = current_generation[i - 1] if i > 0 else 0
+            center = current_generation[i]
+            right = current_generation[(i + 1) % len(current_generation)]
+            next_cell = (left, center, right)
+            rule = {(1, 1, 1): 0, (1, 1, 0): 0, (1, 0, 1): 0, (1, 0, 0): 1, (0, 1, 1): 1, (0, 1, 0): 1, (0, 0, 1): 1, (0, 0, 0): 0}
+            next_generation.append(rule[next_cell])
+        key_binary += ''.join(map(str, next_generation))
+        current_generation = next_generation
+    key_hex = hex(int(key_binary[:28], 2))[2:].zfill(7) # Using only the first 28 bits to create a 7-character key
+    return key_hex
 
 
-
-
-
-
-# define rule_30 celular automata
-def rule_30(current_generation):
-    next_generation = []
-    for i in range(len(current_generation)):
-        left = current_generation[i - 1] if i > 0 else 0
-        center = current_generation[i]
-        right = current_generation[i + 1] if i < len(current_generation) - 1 else 0
-        next_generation.append(0 if left == right else 1)
-    return next_generation
 
 # define search function
 
@@ -42,7 +47,7 @@ async def fetch_search_results(query):
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page()
-        search_url = f"https://www.bing.com/search?q={urllib.parse.quote(query)}&PC=U316&FORM=CHROMN"
+        search_url = f"https://www.bing.com/search?q={urllib.parse.quote(query)}"
         await page.goto(search_url)
         await page.wait_for_selector(".b_algo")
 
@@ -143,17 +148,11 @@ async def gematria_lookup(number):
         await browser.close()
         return content
 
-
-
-
-
 async def main():
-
-
     # Initialize the tokenizer
     gpt2_tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 
-    # 1. Get an input by the user, as text. Properly handle Unicode and special characters.
+    # 1. Get an input by the user, as text.
     text = input("Enter your text: ").strip()
     print(f"1. Got input: {text}")
 
@@ -162,7 +161,6 @@ async def main():
     inputs = gpt2_tokenizer.encode(text, return_tensors="pt", max_length=50, truncation=True)
     max_length = 50
     print(f"Tokenized input: {inputs}")
-    
 
     # 3. Do the web search with the terms.
     search_results = await fetch_search_results(text)
@@ -174,45 +172,36 @@ async def main():
     search_result_tokenized = gpt2_tokenizer.encode(search_result_text, return_tensors="pt")
 
     # 5. Pass the tokenized data to the cellular automata as seed.
+    print("5. Creating seed for cellular automata...")
     hash_object = hashlib.md5(search_result_text.encode())
     hex_dig = hash_object.hexdigest()
     seed_value = int(hex_dig, 16) % 256
-    pattern = [int(b) for b in format(seed_value, '08b')]
+    pattern = [int(b) for b in format(seed_value, '08b')] * 8
 
     # 6. Get the result from automata.
-    for _ in range(len(pattern)):
-        pattern = rule_30(pattern)
-    ca_response = pattern[len(pattern) // 2]
-    print(f"6. Cellular Automata Result: {ca_response}")
+    print("6. Running cellular automata...")
+    key = rule_30(pattern)
+    print(f"6. 7-Character Key: {key}")
 
     # 7. Turn both data into a seed back into as many words as the seed allows using the language model.
-    combined_seed = f"{ca_response} {gpt2_tokenizer.decode(search_result_tokenized[0])}"[:max_length]
+    print("7. Generating GPT-2 response...")
+    combined_seed = f"{key} {gpt2_tokenizer.decode(search_result_tokenized[0])}"[:max_length]
     response_from_gpt2 = generate_gpt2_response(combined_seed, max_length)
     print(f"7. GPT-2 Output: {response_from_gpt2}")
-    
-    #  output the combined seed.
-    
-    combined_seed = f"{ca_response} {gpt2_tokenizer.decode(inputs[0])}"[:max_length]
-    print(f"9. Combined Seed: {combined_seed}") 
 
     # 8. Turn the words into gematria number.
+    print("8. Calculating gematria...")
     gematria_values, total_value = simple_gematria_with_total(response_from_gpt2)
     if gematria_values:
         gematria_formula = ", ".join([f"{pair[0]}: {pair[1]}" for pair in gematria_values])
         print(f"8. Gematria: {gematria_formula} | Total: {total_value}")
-        
-        # Lookup the gematria number on gematrix.org
+
+        # 9. Lookup the gematria number on gematrix.org
+        print("9. Looking up gematria value on gematrix.org...")
         gematrix_result = await gematria_lookup(total_value)
         print(f"9. Gematrix.org Result: {gematrix_result}")
-
     else:
         print("8. Gematria: No valid letters found.")
 
-        
-    
-        
-        
-
 await main()
 
-# WORKING
