@@ -11,7 +11,7 @@ Features:
 - Language model powered web-search, supports any transformer model
 - Tokenizer to gematria calculator for sentiment analysis
 - English gematria to gematrix results
-- Word sentiment gatherer
+
 
 
 #### to run -> do -> python gem.py 
