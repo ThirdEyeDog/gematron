@@ -8,6 +8,8 @@ This project implements a system that takes user input, retrieves related conten
 
 #### to run -> do -> python gem.py 
 
+NOTE: Run on a jupyter notebook to display the images
+
 TODO LIST -  check issues for todo-list https://github.com/ThirdEyeDog/gematron/issues/1
 
 This shows the key steps of hashing the web content into a cellular automaton seed, evolving the pattern, extracting the middle cell state, and using it alongside the search result text to generate the final response. The integration of different techniques is what makes this project unique.
