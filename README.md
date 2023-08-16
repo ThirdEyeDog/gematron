@@ -13,26 +13,6 @@ NOTE: Run on a jupyter notebook to display the images
 
 TODO LIST -  check issues for todo-list https://github.com/ThirdEyeDog/gematron/issues/1
 
-This shows the key steps of hashing the web content into a cellular automaton seed, evolving the pattern, extracting the middle cell state, and using it alongside the search result text to generate the final response. The integration of different techniques is what makes this project unique.
-
-```python
-# Convert search result text to cellular automaton seed 
-hash_object = hashlib.md5(search_result_text.encode())
-hex_dig = hash_object.hexdigest()
-seed_value = int(hex_dig, 16) % 256
-pattern = [int(b) for b in format(seed_value, '08b')]
-
-# Evolve cellular automaton and extract middle cell
-pattern = rule_30(pattern) 
-ca_response = pattern[len(pattern) // 2]
-
-# Generate response using CA state and search results
-combined_seed = f"{ca_response} {gpt2_tokenizer.decode(search_result_tokenized[0])}" 
-response_from_gpt2 = generate_gpt2_response(combined_seed)
-```
-
-
-
 Main Flow:
 
 - Take user input.
