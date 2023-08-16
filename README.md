@@ -13,10 +13,7 @@ Features:
 - English gematria to gematrix results
 
 
-
-#### to run -> do -> python gem.py 
-
-NOTE: Run on a jupyter notebook to display the images
+NOTE: just clone and run, run on a jupyter notebook to display the images
 
 TODO LIST -  check issues for todo-list https://github.com/ThirdEyeDog/gematron/issues/1
 
