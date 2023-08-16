@@ -13,22 +13,13 @@ NOTE: Run on a jupyter notebook to display the images
 
 TODO LIST -  check issues for todo-list https://github.com/ThirdEyeDog/gematron/issues/1
 
-Main Flow:
-
-- Take user input.
-- Tokenize it using GPT-2's tokenizer.
-- Fetch the web search result of the input text.
-- Tokenize the search result.
-- Convert the search result into a seed value for cellular automata through MD5 hashing.
-- Apply the rule_30 function on the seed pattern.
-- Use the cellular automata result and the tokenized search result as a combined seed to generate a response from GPT-2.
-- Compute the gematria value of the GPT-2 generated response.
-- Output the combined seed based on the cellular automata result and the original user input.
-
 
 Features:
 
-- Random number generator with seed-simulated cellular automata, Rule 30.
-- language model powered web-search, supports any transformer model
-- tokenizer to gematria calculator for sentiment analysis 
+- Random number generator with seed-simulated cellular automata, Rule 30 as 28bit key.
+- Random tarot card draw
+- Language model powered web-search, supports any transformer model
+- Tokenizer to gematria calculator for sentiment analysis
+- English gematria to gematrix results
+  
   
