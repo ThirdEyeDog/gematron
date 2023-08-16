@@ -1,13 +1,24 @@
+# V0.0.0.4 TAROT FLATENED
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from langchain.memory import ConversationEntityMemory
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 from playwright.async_api import async_playwright
+from IPython.display import Image, display
+from PIL import Image as PILImage
+from langchain.llms import OpenAI
 from bs4 import BeautifulSoup
 import urllib.parse
 import asyncio
 import hashlib
 import urllib
+import random
 import torch
 import re
 import os
+
+
+import time
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -15,10 +26,13 @@ model_name = "gpt2-medium"
 gpt2_tokenizer = GPT2Tokenizer.from_pretrained(model_name)
 gpt2_model = GPT2LMHeadModel.from_pretrained(model_name)
 
-#v.0.0.0.3
-# current
+#v.0.0.0.4
+# TAROT
 
-import time
+
+
+
+
 
 def rule_30(current_generation, generations=7):
     key_binary = ""
@@ -147,6 +161,12 @@ async def gematria_lookup(number):
 
         await browser.close()
         return content
+    
+    
+
+    
+    
+
 
 async def main():
     # Initialize the tokenizer
@@ -154,54 +174,77 @@ async def main():
 
     # 1. Get an input by the user, as text.
     text = input("Enter your text: ").strip()
-    print(f"1. Got input: {text}")
+    print(f"Got input: {text}")
 
     # 2. Tokenize the input using the GPT2 tokenizer from Transformers
-    print("2. Tokenizing input...")
+    print("Tokenizing input...")
     inputs = gpt2_tokenizer.encode(text, return_tensors="pt", max_length=50, truncation=True)
     max_length = 50
     print(f"Tokenized input: {inputs}")
 
     # 3. Do the web search with the terms.
     search_results = await fetch_search_results(text)
-    print(f"3. Web search results: {search_results}")
+    print(f"Web search results: {search_results}")
 
     # 4. Get the data from the search’s tokenise the data.
-    print("4. Tokenizing first search result...")
+    print("Tokenizing first search result...")
     search_result_text = search_results if search_results else ""
     search_result_tokenized = gpt2_tokenizer.encode(search_result_text, return_tensors="pt")
 
     # 5. Pass the tokenized data to the cellular automata as seed.
-    print("5. Creating seed for cellular automata...")
+    print("Creating seed for cellular automata...")
     hash_object = hashlib.md5(search_result_text.encode())
     hex_dig = hash_object.hexdigest()
     seed_value = int(hex_dig, 16) % 256
     pattern = [int(b) for b in format(seed_value, '08b')] * 8
 
     # 6. Get the result from automata.
-    print("6. Running cellular automata...")
+    print("Running cellular automata...")
     key = rule_30(pattern)
-    print(f"6. 7-Character Key: {key}")
+    print(f"7-Character Key: {key}")
 
     # 7. Turn both data into a seed back into as many words as the seed allows using the language model.
     print("7. Generating GPT-2 response...")
     combined_seed = f"{key} {gpt2_tokenizer.decode(search_result_tokenized[0])}"[:max_length]
     response_from_gpt2 = generate_gpt2_response(combined_seed, max_length)
-    print(f"7. GPT-2 Output: {response_from_gpt2}")
+    print(f"GPT-2 Output: {response_from_gpt2}")
 
     # 8. Turn the words into gematria number.
-    print("8. Calculating gematria...")
+    print("Calculating gematria...")
     gematria_values, total_value = simple_gematria_with_total(response_from_gpt2)
     if gematria_values:
         gematria_formula = ", ".join([f"{pair[0]}: {pair[1]}" for pair in gematria_values])
-        print(f"8. Gematria: {gematria_formula} | Total: {total_value}")
+        print(f"Gematria: {gematria_formula} | Total: {total_value}")
 
         # 9. Lookup the gematria number on gematrix.org
-        print("9. Looking up gematria value on gematrix.org...")
+        print("Looking up gematria value on gematrix.org...")
         gematrix_result = await gematria_lookup(total_value)
-        print(f"9. Gematrix.org Result: {gematrix_result}")
+        print(f"Gematrix.org Result: {gematrix_result}")
     else:
-        print("8. Gematria: No valid letters found.")
+        print(" Gematria: No valid letters found.")
+        
+        
 
-await main()
+    # Directory path
+    dir_path = './tarot'
+    images = os.listdir(dir_path)
+
+    # Utilize CSPRNG
+    rng = random.SystemRandom()
+    selected_card = rng.choice(images)
+
+    # Open and display the selected image
+    image_path = os.path.join(dir_path, selected_card)
+    image = PILImage.open(image_path)
+    display(image)
+
+    # Output the card name
+    card_name = os.path.splitext(selected_card)[0]
+    print('Card Name:', card_name)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
+
 
