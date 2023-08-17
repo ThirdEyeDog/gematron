@@ -10,8 +10,11 @@ Features:
 - Tokenizer to gematria calculator for sentiment analysis
 - English gematria to gematrix results
 
+  RUNNING NOTE: just clone and run. run on a jupyter notebook to display the images.
 
-NOTE: just clone and run, run on a jupyter notebook to display the images
+``` pip install matplotlib numpy playwright aiohttp transformers PIL ```
+
+
 
 TODO LIST -  check issues for todo-list https://github.com/ThirdEyeDog/gematron/issues/1
 
