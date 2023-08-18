@@ -1,5 +1,6 @@
-# GEMATRON
-A gematria-evolved AI oracle 
+
+# GEMATRON - A gematria-evolved AI oracle 
+![F3edaREXwAAes4K](https://github.com/ThirdEyeDog/gematron/assets/140479281/64636a3e-8529-43df-ad86-4241dbc4bfa5)
 
 
 Features:
