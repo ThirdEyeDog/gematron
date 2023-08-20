@@ -2,6 +2,7 @@
 # GEMATRON - A gematria-evolved AI oracle 
 ![F3edaREXwAAes4K](https://github.com/ThirdEyeDog/gematron/assets/140479281/64636a3e-8529-43df-ad86-4241dbc4bfa5)
 
+#### check issues for TODO and project notes
 
 Features:
 - Text input to mystic generation powered by LLM
@@ -10,6 +11,8 @@ Features:
 - Language model powered web-search, supports any transformer model
 - Tokenizer to gematria calculator for sentiment analysis
 - English gematria to gematrix results
+- Sentiment averager
+- Heart and brain functions
 
   RUNNING NOTE: just clone and run. run on a jupyter notebook to display the images.
 
